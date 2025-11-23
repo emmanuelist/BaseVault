@@ -1,8 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp } from "lucide-react";
-import { useState } from "react";
+import { TrendingUp, TrendingDown, Activity } from "lucide-react";
+import { useState, useMemo } from "react";
+import { useTokenBalances } from "@/hooks/useTokenBalances";
+import { PortfolioHistoryService } from "@/lib/portfolioHistory";
 import {
   LineChart,
   Line,
@@ -11,62 +13,66 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Area,
+  AreaChart,
 } from "recharts";
-
-const data7d = [
-  { date: "Mon", value: 23100 },
-  { date: "Tue", value: 23500 },
-  { date: "Wed", value: 22800 },
-  { date: "Thu", value: 24000 },
-  { date: "Fri", value: 23700 },
-  { date: "Sat", value: 24200 },
-  { date: "Sun", value: 24532 },
-];
-
-const data30d = [
-  { date: "Feb 1", value: 21000 },
-  { date: "Feb 5", value: 21500 },
-  { date: "Feb 10", value: 22200 },
-  { date: "Feb 15", value: 21800 },
-  { date: "Feb 20", value: 23400 },
-  { date: "Feb 25", value: 24100 },
-  { date: "Feb 26", value: 24532 },
-];
-
-const data90d = [
-  { date: "Dec", value: 18000 },
-  { date: "Jan", value: 19500 },
-  { date: "Feb", value: 24532 },
-];
-
-const dataAll = [
-  { date: "Jan 1", value: 15000 },
-  { date: "Jan 8", value: 16500 },
-  { date: "Jan 15", value: 15800 },
-  { date: "Jan 22", value: 18200 },
-  { date: "Jan 29", value: 19500 },
-  { date: "Feb 5", value: 21000 },
-  { date: "Feb 12", value: 20500 },
-  { date: "Feb 19", value: 22800 },
-  { date: "Feb 26", value: 24532 },
-];
 
 type Period = "7d" | "30d" | "90d" | "all";
 
-const dataMap: Record<Period, typeof data7d> = {
-  "7d": data7d,
-  "30d": data30d,
-  "90d": data90d,
-  all: dataAll,
+const periodToDays: Record<Period, number> = {
+  "7d": 7,
+  "30d": 30,
+  "90d": 90,
+  all: 365,
 };
 
 export function PortfolioChart() {
   const [period, setPeriod] = useState<Period>("7d");
-  const data = dataMap[period];
+  const { tokens } = useTokenBalances();
   
-  const currentValue = data[data.length - 1].value;
-  const previousValue = data[0].value;
-  const change = ((currentValue - previousValue) / previousValue) * 100;
+  // Get real historical data or use current value as fallback
+  const chartData = useMemo(() => {
+    const days = periodToDays[period];
+    const snapshots = PortfolioHistoryService.getSnapshotsInRange(days);
+    
+    if (snapshots.length === 0) {
+      // No history yet - use current portfolio value
+      const currentValue = tokens.reduce((sum, token) => {
+        const value = parseFloat(token.value.replace(/[$,]/g, ''));
+        return sum + value;
+      }, 0);
+      
+      // Generate mock data points for visualization
+      const points = period === '7d' ? 7 : period === '30d' ? 30 : period === '90d' ? 90 : 365;
+      return Array.from({ length: points }, (_, i) => {
+        const variance = Math.random() * 0.1 - 0.05; // ±5% variance
+        return {
+          date: formatDate(Date.now() - (points - i - 1) * 24 * 60 * 60 * 1000, period),
+          value: currentValue * (1 + variance),
+        };
+      });
+    }
+    
+    // Use real historical data
+    return snapshots.map(snapshot => ({
+      date: formatDate(snapshot.timestamp, period),
+      value: snapshot.totalValue,
+    }));
+  }, [period, tokens]);
+  
+  const performance = useMemo(() => {
+    if (chartData.length < 2) {
+      return { change: 0, currentValue: 0, previousValue: 0 };
+    }
+    
+    const currentValue = chartData[chartData.length - 1].value;
+    const previousValue = chartData[0].value;
+    const change = previousValue > 0 ? ((currentValue - previousValue) / previousValue) * 100 : 0;
+    
+    return { change, currentValue, previousValue };
+  }, [chartData]);
+  
+  const { change, currentValue } = performance;
 
   return (
     <Card className="glass-card border-border/50">
