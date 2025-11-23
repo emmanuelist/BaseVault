@@ -9,9 +9,20 @@ import { NFTGallery } from "@/components/NFTGallery";
 import { EmptyState } from "@/components/EmptyState";
 import { Wallet2, Download } from "lucide-react";
 import { useAccount } from "wagmi";
+import { usePortfolioTracking } from "@/hooks/usePortfolioTracking";
+import { useEffect } from "react";
+import { MultiWalletService } from "@/lib/multiWallet";
 
 const Index = () => {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
+  
+  // Automatically track portfolio history
+  usePortfolioTracking();
+  
+  // Update connected wallet in multi-wallet service
+  useEffect(() => {
+    MultiWalletService.setConnectedWallet(address);
+  }, [address]);
 
   return (
     <div className="min-h-screen bg-background">
