@@ -1,12 +1,15 @@
 import { WalletButton } from "@/components/WalletButton";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { ExportButton } from "@/components/ExportButton";
+import { AdvancedExportButton } from "@/components/AdvancedExportButton";
 import { PortfolioDashboard } from "@/components/PortfolioDashboard";
 import { PerformanceStats } from "@/components/PerformanceStats";
 import { TokenHoldings } from "@/components/TokenHoldings";
 import { PortfolioChart } from "@/components/PortfolioChart";
+import { PortfolioAllocation } from "@/components/PortfolioAllocation";
 import { TransactionHistory } from "@/components/TransactionHistory";
+import { GasAnalytics } from "@/components/GasAnalytics";
 import { NFTGallery } from "@/components/NFTGallery";
+import { MultiWalletManager } from "@/components/MultiWalletManager";
 import { EmptyState } from "@/components/EmptyState";
 import { Wallet2, Download } from "lucide-react";
 import { useAccount } from "wagmi";
@@ -43,14 +46,7 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-2 md:gap-3">
-              {/* Export Button - Icon only on mobile */}
-              <div className="hidden sm:block">
-                <ExportButton />
-              </div>
-              <button className="sm:hidden h-9 w-9 rounded-md border border-border/50 hover:bg-accent hover:text-accent-foreground flex items-center justify-center">
-                <Download className="h-4 w-4" />
-              </button>
-              
+              <AdvancedExportButton />
               <ThemeToggle />
               <WalletButton />
             </div>
@@ -79,19 +75,32 @@ const Index = () => {
               <PortfolioChart />
             </section>
 
-            {/* Token Holdings and NFTs */}
+            {/* Token Holdings and Portfolio Allocation */}
             <section
               className="grid gap-8 lg:grid-cols-2 animate-slide-up"
               style={{ animationDelay: "0.2s" }}
             >
               <TokenHoldings />
-              <div className="lg:col-span-2">
-                <NFTGallery />
-              </div>
+              <PortfolioAllocation />
+            </section>
+
+            {/* Multi-Wallet Manager */}
+            <section className="animate-slide-up" style={{ animationDelay: "0.25s" }}>
+              <MultiWalletManager />
+            </section>
+
+            {/* Gas Analytics */}
+            <section className="animate-slide-up" style={{ animationDelay: "0.3s" }}>
+              <GasAnalytics />
+            </section>
+
+            {/* NFT Gallery */}
+            <section className="animate-slide-up" style={{ animationDelay: "0.35s" }}>
+              <NFTGallery />
             </section>
 
             {/* Transaction History */}
-            <section className="animate-slide-up" style={{ animationDelay: "0.3s" }}>
+            <section className="animate-slide-up" style={{ animationDelay: "0.4s" }}>
               <TransactionHistory />
             </section>
           </div>
