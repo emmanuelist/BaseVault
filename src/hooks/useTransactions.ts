@@ -27,7 +27,14 @@ export function useTransactions() {
       const basescanKey = import.meta.env.VITE_BASESCAN_API_KEY;
       
       if (!basescanKey) {
-        console.warn('Basescan API key not found. Using mock transaction data.');
+        console.warn(
+          '⚠️ Basescan API key not found!\n' +
+          '📝 To see real transaction history:\n' +
+          '1. Get free API key from https://basescan.org/apis\n' +
+          '2. Add to .env: VITE_BASESCAN_API_KEY=your_key\n' +
+          '3. Restart dev server\n' +
+          '📖 See API_KEYS_SETUP.md for detailed instructions'
+        );
         return [];
       }
 

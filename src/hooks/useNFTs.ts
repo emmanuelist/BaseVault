@@ -23,7 +23,15 @@ export function useNFTs() {
       const alchemyKey = import.meta.env.VITE_ALCHEMY_API_KEY;
       
       if (!alchemyKey) {
-        console.warn('Alchemy API key not found. Using mock NFT data.');
+        console.warn(
+          '⚠️ Alchemy API key not found!\n' +
+          '📝 To see real NFT collections:\n' +
+          '1. Get free API key from https://www.alchemy.com/\n' +
+          '2. Create app on Base network\n' +
+          '3. Add to .env: VITE_ALCHEMY_API_KEY=your_key\n' +
+          '4. Restart dev server\n' +
+          '📖 See API_KEYS_SETUP.md for detailed instructions'
+        );
         return [];
       }
 
