@@ -2,6 +2,7 @@ import { WalletButton } from "@/components/WalletButton";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ExportButton } from "@/components/ExportButton";
 import { PortfolioDashboard } from "@/components/PortfolioDashboard";
+import { PerformanceStats } from "@/components/PerformanceStats";
 import { TokenHoldings } from "@/components/TokenHoldings";
 import { PortfolioChart } from "@/components/PortfolioChart";
 import { TransactionHistory } from "@/components/TransactionHistory";
@@ -62,10 +63,15 @@ const Index = () => {
         {!isConnected ? (
           <EmptyState />
         ) : (
-          <div className="space-y-10">
+          <div className="space-y-8">
             {/* Dashboard Stats */}
             <section className="animate-slide-up">
               <PortfolioDashboard />
+            </section>
+
+            {/* Performance Stats */}
+            <section className="animate-slide-up" style={{ animationDelay: "0.05s" }}>
+              <PerformanceStats />
             </section>
 
             {/* Chart */}
