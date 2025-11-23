@@ -78,12 +78,18 @@ export function PortfolioChart() {
     <Card className="glass-card border-border/50">
       <CardHeader>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <CardTitle className="text-xl">Portfolio Value</CardTitle>
-            <Badge variant={change >= 0 ? "default" : "destructive"} className={change >= 0 ? "bg-success/10 text-success hover:bg-success/20" : ""}>
-              <TrendingUp className="h-3 w-3 mr-1" />
-              {change.toFixed(2)}%
-            </Badge>
+          <div>
+            <CardTitle className="text-xl mb-2">Portfolio Value</CardTitle>
+            <div className="flex items-center gap-3">
+              <span className="text-3xl font-bold">${currentValue.toFixed(2)}</span>
+              <Badge 
+                variant={change >= 0 ? "default" : "destructive"} 
+                className={change >= 0 ? "bg-success/10 text-success hover:bg-success/20" : ""}
+              >
+                {change >= 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
+                {change >= 0 ? '+' : ''}{change.toFixed(2)}%
+              </Badge>
+            </div>
           </div>
           <Tabs value={period} onValueChange={(v) => setPeriod(v as Period)} className="w-fit">
             <TabsList className="bg-muted/50">
@@ -97,23 +103,25 @@ export function PortfolioChart() {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
+          <AreaChart data={chartData}>
             <defs>
               <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
+                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.05} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.2} />
             <XAxis
               dataKey="date"
               stroke="hsl(var(--muted-foreground))"
-              fontSize={12}
+              fontSize={11}
+              tickMargin={8}
             />
             <YAxis
               stroke="hsl(var(--muted-foreground))"
-              fontSize={12}
-              tickFormatter={(value) => `$${value / 1000}k`}
+              fontSize={11}
+              tickFormatter={(value) => `$${(value / 1).toFixed(0)}`}
+              width={60}
             />
             <Tooltip
               contentStyle={{
@@ -122,19 +130,35 @@ export function PortfolioChart() {
                 borderRadius: "8px",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
               }}
-              formatter={(value: number) => [`$${value.toLocaleString()}`, "Value"]}
+              labelStyle={{ color: "hsl(var(--foreground))" }}
+              formatter={(value: number) => [`$${value.toFixed(2)}`, "Portfolio Value"]}
             />
-            <Line
+            <Area
               type="monotone"
               dataKey="value"
               stroke="hsl(var(--primary))"
-              strokeWidth={3}
-              dot={false}
+              strokeWidth={2}
               fill="url(#colorValue)"
+              dot={false}
             />
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>
   );
+}
+
+// Helper function to format dates based on period
+function formatDate(timestamp: number, period: Period): string {
+  const date = new Date(timestamp);
+  
+  if (period === '7d') {
+    return date.toLocaleDateString('en-US', { weekday: 'short' });
+  } else if (period === '30d') {
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  } else if (period === '90d') {
+    return date.toLocaleDateString('en-US', { month: 'short' });
+  } else {
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
 }
